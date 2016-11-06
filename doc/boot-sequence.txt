@@ -1,0 +1,95 @@
+2016-11-06 - Boot sequence proposal
+
+The firmware looks for "init.lua" or "init.lc". It is possible to execute a
+file using dofile(). Here we'll try to separate the network settings, the
+the device settings, the system setup and the services.
+
+The file system driver supports having "/" in names, making it easy to emulate
+directories. The "luatool" utility allows to upload files over the serial port.
+
+After programming a device, its filesystem should be prepared like this :
+
+ init.lua :
+   Lua script proceeding with the various boot steps :
+       dofile("netconf.lua")
+       dofile("sysconf.lua")
+       for n,s in pairs(file.list()) do
+         b,e = string.find(n, "lib/")
+         if b == 1 then print("Loading " .. n) dofile(n) end
+       end
+       dofile("netsetup.lua")
+       dofile("socket.lua")
+       dofile("pre-svc.lua")
+       for n,s in pairs(file.list()) do
+         b,e = string.find(n, "svc/")
+         if b == 1 then print("Loading " .. n) dofile(n) end
+       end
+       dofile("post-svc.lua")
+       dofile("appli.lc")
+       dofile("appli.lua")
+
+ netconf.lua :
+   Contains only 3 variables (strings) :
+       wifi_sta_ssid              : wifi network name
+       wifi_sta_passwd (optional) : wifi password
+       wifi_sta_bssid  (optional) : wifi AP MAC address
+
+   Optionally, the IP configuration may be set. All parameters are
+   mandatory if wifi_sta_ip is set :
+
+       wifi_sta_ip : IP address
+       wifi_sta_nm : netmask (dotted)
+       wifi_sta_gw : gateway
+
+ sysconf.lua :
+   Contains a few variables specific to the device. Used to store settings
+   related to external services, for example authentication needed to connect
+   to an MQTT broker, or an alias for the device name.
+
+ lib/*.lua :
+   Libraries offering convenient general purpose functions. They are loaded in
+   any order, and it's preferable to use very few of them for ease of
+   maintenance. Examples could be the "split" and "show" functions.
+
+ netsetup.lua :
+   Sets up the network based on netconf.lua. If information are missing or if
+   the network connection fails, switches back to AP mode. In this case, the
+   SSID becomes the chipid() and the password is the flashid(). This restricts
+   the access to users who can physically see the device and the sticker on it.
+   In order to work around accidental connection failures, when working in AP
+   mode, the device should set up a timer to automatically reboot the device
+   after one minute unless there's an established connection. It should clear
+   the variables after using them. It's important to understand that it is not
+   possible to wait for the connection to be up, the only way is to register
+   alarm timers while the rest of the system is already working.
+
+
+ socket.lua :
+   Creates the listening TCP server. It is mandatory to have exactly one so
+   that all services can bind to a listening port, otherwise each service will
+   be exclusive. The TCP server will be called "tcpsrv". All TCP server
+   applications will use it.
+
+ pre-svc.lua, post-svc.lua :
+   General purpose config file, similar to rc.local, used for anything not
+   planned, are processed respectively before and after loading the services.
+
+ svc/*.lua :
+   Services, loaded in any order. A typical example is the telnet server to
+   access the system.
+
+ appli.lua / appli.lc :
+   The application itself, preferably compiled.
+
+The telnet server is special. For security reasons it should not be started all
+the time. So the idea here is to have some form of "port knocking" :
+  - the knock service listens to port 24
+  - incoming connections to it must provide a password in the form
+    <chipid>:<flashid>:<flashsize>  (all in decimal encoding)
+  - then the service creates the listening socket on port 23 and keeps it
+    listening until connection to port 24 is closed.
+
+This means that by connecting to the device and sending this string, we enable
+the telnet, and we simply disable it by closing this connection. Optionally a
+timer may be set to automatically disable this knocking service a few minutes
+after boot.
