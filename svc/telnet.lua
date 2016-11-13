@@ -41,6 +41,7 @@ tcpsrv:listen(2323,function(c)
       c:unhold()
     else
       local pass=l:gsub("\r",""):gsub("\n","")
+      if pass:byte(1) == 255 then return end
       if pass == telnet_passwd then
         telnet_auth=true
         s_output("> ");
