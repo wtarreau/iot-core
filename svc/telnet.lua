@@ -9,7 +9,7 @@ tcpsrv:listen(2323,function(c)
   local sending=false
   local buffer={}
   local function s_output(str)
-    if c==nil then return end
+    if c==nil or str==nil or str=="" then return end
     if sending then
       table.insert(buffer,str)
     else
