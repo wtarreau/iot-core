@@ -4,8 +4,8 @@ local telnet_auth=false
 if telnet_passwd==nil then
   telnet_passwd="" .. node.chipid() .. node.flashid() ..node.flashsize()
 end
-print("Starting telnet on port " .. 2323 .. " with password [" .. telnet_passwd .."]")
-tcpsrv:listen(2323,function(c)
+print("Starting telnet on port " .. (telnet_port or 23) .. " with password [" .. telnet_passwd .."]")
+tcpsrv:listen((telnet_port or 23),function(c)
   local sending=false
   local buffer={}
   local function s_output(str)
