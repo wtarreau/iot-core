@@ -1,0 +1,23 @@
+Documentation for the telnet service -- 2016-11-13
+
+The service takes two optional configuration settings which are read at boot
+before the service is loaded :
+
+  - telnet_port : a number indicating the port to listen to. If the port is not
+                  set, the service defaults to port 23.
+
+  - telnet_pass : a string corresponding to the password to type on the first
+                  incoming connection. If the password is not set, the
+                  concatenation of node.chipid(), node.flashid() and
+                  node.flashsize() as-is in decimal form and without delimiter
+                  constitutes de default password. These elements can also be
+                  reported by esptool. Note that the flash size is in bytes.
+
+The service relies on a TCP server to have been created and put into the
+"tcpsrv" global variable.
+
+The first incoming connection must authenticate, but subsequent ones will not
+need to as long as at least one connection remains active. This ensures that
+certain utilities like luatool can be used over the TCP socket provided that
+one incoming connection has authenticated and remained active until the second
+one comes in.
