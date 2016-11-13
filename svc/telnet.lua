@@ -1,3 +1,4 @@
+local telnet_conns=0
 tcpsrv:listen(2323,function(c)
   local sending=false
   local buffer={}
@@ -24,7 +25,9 @@ tcpsrv:listen(2323,function(c)
     end
   end)
   c:on("disconnection",function(c)
+    telnet_conns=telnet_conns-1
     node.output(nil)
   end)
-  print("[" .. ((wifi.sta.getip()~=nil) and wifi.sta.getip() or wifi.ap.getip()) .. "]\n> ")
+  telnet_conns=telnet_conns+1
+  print("[" .. ((wifi.sta.getip()~=nil) and wifi.sta.getip() or wifi.ap.getip()) .. " - " .. telnet_conns .. "]\n> ")
 end)
