@@ -1,0 +1,71 @@
+Connecting the devices
+
+node-mcu pin7 / GPIO13 (esp12e.7) => PWM output
+node-mcu pin0 / GPIO16 (esp12e.4) => unused (was cathode temp diode)
+node-mcu pin5 / GPIO14 (esp12e.5) => unused (was cathode light sens)
+node-mcu adc0 / ADC (esp12e.2)    => light sensor
+
+node-mcu ???? / RESET  (esp12e.1)  => internal 12k pull-up to VCC
+node-mcu ???? / CH_PD  (esp12e.3)  => -[10k]- VCC
+node-mcu pin8 / GPIO15 (esp12e.16) => -[10k]- GND
+node-mcu pin4 / GPIO2  (esp12e.17) => -[10k]- VCC
+node-mcu pin3 / GPIO0  (esp12e.18) => -[10k]- VCC
+
+CH_PD/RESET are used to reset just to reprogram the chip and must be connect
+with a pull-up the rest of the time (at least on CH_PD, as RESET already has
+one). IT also means that CH_PD can be connected to RESET to have both pulled
+up.
+
+All the time, GPIO15 = GND.
+
+For regular operation, GPIO0 must be high. During programming, GPIO0
+must be tied to GND and GPIO2 to VCC.
+
+It is worth noting that GPIO0 emits a 40 MHz sine signal during boot, and has
+its internal pull-up when reset or ch_pd is asserted. So there's no need for
+an external pull-up there.
+
+All I/Os except GPIO4 and GPIO5 are pulled up when GPIO15 is not tied to GND.
+All I/Os except GPIO4, GPIO5, GPIO14, GPIO16 are pulled up when GPIO15=GND.
+
+=> for operation, the minimum needed (tested and works) is :
+
+   CH_PD  = RESET
+   GPIO15 = GND
+
+But it's not optimal regarding flashing. The best option (requires one
+resistor) is :
+
+   CH_PD  = --[10K]-- VCC
+   GPIO15 = GND
+
+For flashing, this works :
+
+ESP-12E:
+
+  VCC    -+---------- 3V3
+          |
+          Z 4k7
+          Z
+          | 100n
+  CH_PD  -+--||--+--- DTR
+  EN     -'      |
+                 | B
+               ----- 2N3906/4403
+             E /   \ C
+  GPIO0  -----'     |
+  GPIO15 --[12K]-.--'
+  GND    --------+--- GND
+  TX0    ------------ RXI
+  RX0    ------------ TXO
+
+With this wiring, esptool manages to program the chip. In order
+to reset it however it's needed to toggle DTR quickly (less than
+30 ms) depending on the chips. In case it doesn't work after calling
+esptool, use this :
+
+   ./set-dtr-rts /dev/ttyUSB0 -dtr; ./set-dtr-rts /dev/ttyUSB0 +dtr ; usleep 25000 ; ./set-dtr-rts /dev/ttyUSB0 -dtr
+
+It is worth noting that GPIO0 emits a 40 MHz strong sine signal during boot,
+and has a pull-up when reset or ch_pd is asserted. So there's no need for a
+pull-up.
