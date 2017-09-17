@@ -1,3 +1,7 @@
+if file.exists("nodemcu.lua") then dofile("nodemcu.lua") end
+if file.exists("firmware.lua") then dofile("firmware.lua") end
+if file.exists("board.lua") then dofile("board.lua") end
+
 if file.exists("netconf.lua") then dofile("netconf.lua") end
 if file.exists("sysconf.lua") then dofile("sysconf.lua") end
 for n,s in pairs(file.list()) do
