@@ -1,0 +1,15 @@
+-- nodemcu-specific stuff
+-- pin numbers for each GPIO
+PIN_GP0=3
+PIN_GP1=10
+PIN_GP2=4
+PIN_GP3=9
+PIN_GP4=2
+PIN_GP5=1
+PIN_GP9=11
+PIN_GP10=12
+PIN_GP12=6
+PIN_GP13=7
+PIN_GP14=5
+PIN_GP15=8
+PIN_GP16=0
