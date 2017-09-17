@@ -27,5 +27,6 @@ tmr.alarm(0,500,tmr.ALARM_SEMI,function()
   else
     print("WiFi connected: IP="..wifi.sta.getip().." MAC="..wifi.ap.getmac())
     wifi_retry=nil
+    if sntp_sync ~= nil and (not recovery or recovery() == 0) then sntp_sync() end
   end
 end)
