@@ -28,5 +28,5 @@ if file.exists("pre-svc.lua") then dofile("pre-svc.lua") end
 load_dir("svc")
 
 if file.exists("post-svc.lua") then dofile("post-svc.lua") end
-if file.exists("appli.lc") then dofile("appli.lc") end
-if file.exists("appli.lua") then dofile("appli.lua") end
+if file.exists("appli.lc") and (not recovery or recovery() == 0) then dofile("appli.lc") end
+if file.exists("appli.lua") and (not recovery or recovery() == 0) then dofile("appli.lua") end
