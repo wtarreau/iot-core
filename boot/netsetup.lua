@@ -4,8 +4,9 @@ if (wifi_sta_ip~=nil) then wifi.sta.setip({ip=wifi_sta_ip,netmask=wifi_sta_nm,ga
 wifi_sta_ip=nil wifi_sta_nm=nil wifi_sta_gw=nil
 if (wifi_sta_passwd==nil) then wifi_sta_passwd="" end
 if (wifi_sta_ssid~=nil) then
+  local cfg={ssid=wifi_sta_ssid, pwd=wifi_sta_passwd,bssid=wifi_sta_bssid}
   print("WiFi : trying " .. wifi_sta_ssid .. (wifi_sta_passwd == "" and " without password" or ""))
-  wifi.sta.config(wifi_sta_ssid,wifi_sta_passwd,1,wifi_sta_bssid)
+  wifi.sta.config(cfg)
   wifi_retry=20
 end
 wifi_sta_ssid=nil wifi_sta_passwd=nil wifi_sta_bssid=nil
@@ -20,7 +21,7 @@ tmr.alarm(0,500,tmr.ALARM_SEMI,function()
       tmr.start(0)
     else
       wifi.sta.disconnect() wifi.setmode(wifi.SOFTAP)
-      cfg={ssid="iot4h-"..node.chipid(), pwd="password"..node.flashid()}
+      local cfg={ssid="iot4h-"..node.chipid(), pwd="password"..node.flashid()}
       print("WiFi : switching to AP. SSID="..cfg.ssid.." PWD="..cfg.pwd)
       wifi.ap.config(cfg) cfg=nil wifi_retry=nil
     end
