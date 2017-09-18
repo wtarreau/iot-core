@@ -12,30 +12,35 @@ function load_dir(dir)
   end
 end
 
-if file.exists("nodemcu.lua") then dofile("nodemcu.lua") end
-if file.exists("firmware.lua") then dofile("firmware.lua") end
-if file.exists("board.lua") then dofile("board.lua") end
+function load_file(f)
+  if file.exists(f .. ".lc") then dofile(f .. ".lc")
+  elseif file.exists(f .. ".lua") then dofile(f .. ".lua")
+  end
+end
 
-if file.exists("netconf.lua") then dofile("netconf.lua") end
-if file.exists("sysconf.lua") then dofile("sysconf.lua") end
+load_file("nodemcu")
+load_file("firmware")
+load_file("board")
+load_file("netconf")
+load_file("sysconf")
 
 load_dir("lib")
 
-if file.exists("netsetup.lua") then dofile("netsetup.lua") end
-if file.exists("socket.lua") then dofile("socket.lua") end
-if file.exists("pre-svc.lua") then dofile("pre-svc.lua") end
+load_file("netsetup")
+load_file("socket")
+load_file("pre-svc")
 
 load_dir("svc")
 
-if file.exists("post-svc.lua") then dofile("post-svc.lua") end
+load_file("post-svc")
 
 -- release memory
 load_dir=nil
 
 if not recovery or recovery() == 0 then
-  if file.exists("appli.lc") then dofile("appli.lc")
-  elseif file.exists("appli.lua") then dofile("appli.lua")
-  end
+  load_file("appli")
 else
   print("Skipping appli.lua due to recovery button")
 end
+
+load_file=nil
