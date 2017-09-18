@@ -29,6 +29,9 @@ load_dir("svc")
 
 if file.exists("post-svc.lua") then dofile("post-svc.lua") end
 
+-- release memory
+load_dir=nil
+
 if not recovery or recovery() == 0 then
   if file.exists("appli.lc") then dofile("appli.lc")
   elseif file.exists("appli.lua") then dofile("appli.lua")
