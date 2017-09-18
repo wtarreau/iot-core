@@ -1,6 +1,9 @@
 function disp_init()
   if not brd_oled_addr then return end
-  fct = u8g.ssd1306_128x64_i2c or u8g.ssd1306_128x32_i2c or u8g.ssd1306_64x64_i2c
+  local fct = u8g.ssd1306_128x64_i2c or u8g.ssd1306_128x32_i2c or u8g.ssd1306_64x64_i2c
+  -- release unused memory
+  u8g.ssd1306_128x32_hw_spi=nil
+  u8g.ssd1306_128x64_hw_spi=nil
   if not fct then return end
   disp = fct(brd_oled_addr)
   if disp ~= nil then
