@@ -1,3 +1,6 @@
+-- SNTP server, non critical
+if recovery and recovery() ~= 0 then return end
+
 function sntp_sync()
   if sntp_srv_ip ~= nil then
     sntp.sync(sntp_srv_ip, function()
