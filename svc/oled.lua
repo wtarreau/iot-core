@@ -14,7 +14,7 @@ end
 
 function disp_reset_font(f)
   if not disp then return end
-  disp:setFont(f or default_font or DISP_FONT or u8g.font_6x10 or u8g.font_5x8 or u8g.font_04b_03 or u8g.font_chikita)
+  disp:setFont(f or default_font or DISP_FONT or u8g.font_6x10 or u8g.font_5x8 or u8g.font_04b_03r or u8g.font_04b_03 or u8g.font_chikita)
   disp:setFontRefHeightExtendedText()
   disp:setDefaultForegroundColor()
   disp:setFontPosTop()
@@ -129,7 +129,7 @@ disp_init = nil
 if wifi ~= nil then
   local ssid=wifi.sta.getconfig(wifi.sta.getapindex())
   local a,b=node.bootreason()
-  disp_reset_font(u8g.font_04b_03)
+  disp_reset_font(u8g.font_04b_03r)
   disp_lines(
     "Booting " .. (wifi.sta.gethostname and wifi.sta.gethostname() or "?"),
     "MAC: " .. (wifi.sta.getmac and wifi.sta.getmac() or "?"),
