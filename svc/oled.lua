@@ -39,6 +39,9 @@ function disp_lines(...)
 end
 
 disp_init()
+-- release unused memory
+disp_init = nil
+
 if wifi ~= nil then
   local ssid=wifi.sta.getconfig(wifi.sta.getapindex())
   local a,b=node.bootreason()
