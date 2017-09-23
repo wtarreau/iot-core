@@ -112,6 +112,12 @@ function disp_7seg_str(x0,y0,s,u)
   until not disp:nextPage()
 end
 
+function disp_release()
+  disp=nil disp_init=nil disp_reset_font=nil disp_clear=nil disp_lines=nil
+  draw_7seg=nil draw_7seg_char=nil draw_7seg_str=nil disp_7seg_str=nil
+  disp_release=nil
+end
+
 disp_init()
 -- release unused memory
 disp_init = nil
