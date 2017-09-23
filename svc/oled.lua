@@ -77,13 +77,14 @@ function draw_7seg(x0,y0,code)
 end
 
 -- Display character <c> with top left corner at (x0,y0). For now values of <d>
--- may be within '0' and '9'. Characters are 12 pixels wide by 20 pixels high
--- (24 with the underline).
-function disp_7seg(x0,y0,c)
+-- may be within '0' and '9'. An optional non-zero value may be passed as a 4th
+-- argument to underline the character. Characters are 12 pixels wide by 20
+-- pixels high (24 with the underline).
+function disp_7seg(x0,y0,c,u)
   local dig=string.char(0x3F, 0x06, 0x5b, 0x4F, 0x66, 0x6d, 0x7d, 0x07, 0x7F, 0x6F)
   local code=string.byte(c)
   if code >= 0x30 and code <= 0x39 then
-    draw_7seg(x0,y0,string.byte(dig,code-0x30+1))
+    draw_7seg(x0,y0,string.byte(dig,code-0x30+1)+(u and u>0 and 128 or 0))
   end
 end
 
