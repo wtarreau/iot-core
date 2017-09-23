@@ -81,10 +81,14 @@ end
 -- argument to underline the character. Characters are 12 pixels wide by 20
 -- pixels high (24 with the underline).
 function disp_7seg(x0,y0,c,u)
-  local dig=string.char(0x3F, 0x06, 0x5b, 0x4F, 0x66, 0x6d, 0x7d, 0x07, 0x7F, 0x6F)
   local code=string.byte(c)
+  if not disp then return end
   if code >= 0x30 and code <= 0x39 then
+    local dig=string.char(0x3F, 0x06, 0x5b, 0x4F, 0x66, 0x6d, 0x7d, 0x07, 0x7F, 0x6F)
     draw_7seg(x0,y0,string.byte(dig,code-0x30+1)+(u and u>0 and 128 or 0))
+  elseif code == 0x3a then
+    disp:drawDisc(x0+5, y0+5, 2, DRAW_ALL)
+    disp:drawDisc(x0+5, y0+13, 2, DRAW_ALL)
   end
 end
 
