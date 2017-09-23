@@ -1,7 +1,7 @@
 function load_dir(dir)
   local toload={}
   for n,s in pairs(file.list()) do
-    b,e = string.find(n, dir .. "/")
+    local b,e = string.find(n, dir .. "/")
     if b == 1 then table.insert(toload,n) end
   end
   table.sort(toload)
