@@ -1,3 +1,6 @@
+-- to be sure to fix it
+uart.setup(0,115200,8,0,1)
+
 function load_dir(dir)
   local toload={}
   for n,s in pairs(file.list()) do
