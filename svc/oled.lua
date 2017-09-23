@@ -79,9 +79,10 @@ end
 -- Display character <c> with top left corner at (x0,y0). For now values of <d>
 -- may be within '0' and '9'. An optional non-zero value may be passed as a 4th
 -- argument to underline the character. Characters are 12 pixels wide by 20
--- pixels high (24 with the underline).
+-- pixels high (24 with the underline). <c> may be either a character or an
+-- ASCII code
 function disp_7seg(x0,y0,c,u)
-  local code=string.byte(c)
+  local code= (type(c)=="string") and string.byte(c) or tonumber(c)
   if not disp then return end
   if code >= 0x30 and code <= 0x39 then
     local dig=string.char(0x3F, 0x06, 0x5b, 0x4F, 0x66, 0x6d, 0x7d, 0x07, 0x7F, 0x6F)
