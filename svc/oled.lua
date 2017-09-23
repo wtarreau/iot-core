@@ -76,12 +76,12 @@ function draw_7seg(x0,y0,code)
   end
 end
 
--- Display character <c> with top left corner at (x0,y0). For now values of <d>
+-- Draw character <c> with top left corner at (x0,y0). For now values of <d>
 -- may be within '0' and '9'. An optional non-zero value may be passed as a 4th
 -- argument to underline the character. Characters are 12 pixels wide by 20
 -- pixels high (24 with the underline). <c> may be either a character or an
--- ASCII code
-function disp_7seg(x0,y0,c,u)
+-- ASCII code.
+function draw_7seg_char(x0,y0,c,u)
   local code= (type(c)=="string") and string.byte(c) or tonumber(c)
   if not disp then return end
   if code >= 0x30 and code <= 0x39 then
@@ -91,6 +91,25 @@ function disp_7seg(x0,y0,c,u)
     disp:drawDisc(x0+5, y0+5, 2, DRAW_ALL)
     disp:drawDisc(x0+5, y0+13, 2, DRAW_ALL)
   end
+end
+
+-- Draws string <s> at <x0,y0> using a 7seg font, and underline char #<u> if
+-- positive (starts at 1).
+function draw_7seg_str(x0,y0,s,u)
+  local i
+  for i=1,#s do
+    draw_7seg_char(x0+(i-1)*13,y0,s:byte(i),u and u == i and 1 or 0)
+  end
+end
+
+-- displays string <s> at <x0,y0> using 7-seg, and underline char <u> if
+-- positive (starts at 1).
+function disp_7seg_str(x0,y0,s,u)
+  if not disp then return end
+  disp:firstPage()
+  repeat
+    draw_7seg_str(x0,y0,s,u)
+  until not disp:nextPage()
 end
 
 disp_init()
