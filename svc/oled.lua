@@ -137,3 +137,6 @@ if wifi ~= nil then
     "Mode: " .. (recovery and recovery() > 0 and "dbg" or "run") .. ", boot " .. a .. "," .. b)
   disp_reset_font()
 end
+
+-- release memory when in debug mode
+if recovery and recovery() ~= 0 then disp_release() end
