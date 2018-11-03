@@ -4,7 +4,7 @@ if (wifi_sta_ip~=nil) then wifi.sta.setip({ip=wifi_sta_ip,netmask=wifi_sta_nm,ga
 wifi_sta_ip=nil wifi_sta_nm=nil wifi_sta_gw=nil
 if (wifi_sta_passwd==nil) then wifi_sta_passwd="" end
 if (wifi_sta_ssid~=nil) then
-  local cfg={ssid=wifi_sta_ssid, pwd=wifi_sta_passwd,bssid=wifi_sta_bssid}
+  local cfg={ssid=wifi_sta_ssid,pwd=(wifi_sta_passwd~="") and wifi_sta_passwd or nil,bssid=wifi_sta_bssid}
   print("WiFi : trying " .. wifi_sta_ssid .. (wifi_sta_passwd == "" and " without password" or ""))
   wifi.sta.config(cfg)
   wifi_retry=20
