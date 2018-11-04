@@ -5,3 +5,4 @@ function sshow(x)
   table.sort(t)
   for i,k in ipairs(t) do print(k,x[k]) end
 end
+function ls() sshow(file.list()) end
