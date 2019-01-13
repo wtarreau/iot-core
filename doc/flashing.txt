@@ -1,0 +1,200 @@
+1) Getting the firmware
+-----------------------
+
+A firmware must be built using https://nodemcu-build.com/ (version 1.5.4.1 or
+better, "master" using version 2.1 or above). For each configuration, two
+images will be provided, one using flots and a smaller one using integers. The
+latter might be required for some projects using lots of memory. The minimally
+required modules will often be :
+
+- Base :
+   node
+   uart
+   net
+   wifi
+
+- For I/O operations :
+   gpio
+   i2c
+   pwm
+
+- For files access :
+   file
+
+- to use the internal time :
+   rtctime
+
+- to rely on an external NTP time source :
+   sntp
+   tmr
+
+- to use an OLED display :
+   u8g
+
+While the u8g module is already small, it can be further reduced by eliminating
+unused fonts :
+   - remove font 6x10 (~600B) and chikita (2.2kB)
+   - use font 04b_03r (729 bytes) instead of 04b_03 (859)
+
+Please don't forget to donate even a little bit to the nodemcu-build project to
+ensure the service continues to run, as it is extremely convenient.
+
+
+2) Preparing the environment
+----------------------------
+
+The "esptool" utility is required to flash the firmware. This utility can be
+retrieved here :
+
+   https://github.com/espressif/esptool
+
+It requires a working python installation. The documentation that comes with
+the utility is fairly complete about the various installation notes and how to
+deal with failures, so this will not be covered here.
+
+Another tool, "luatool", will be needed to upload the Lua programs :
+
+   https://github.com/4refr0nt/luatool
+
+It also requires python.
+
+From now on it's assumed that both tools are properly installed and that the
+local tools/ directory contains symbolic links to their respective locations.
+
+
+3) Flashing the firmware
+------------------------
+
+The method used for flashing will depend on the module. ESP-12E uses 40 MHz
+flash clock, a 32 Mb flash size, and the DIO flash mode. The ESP8285 contains
+only 1 MB (8 Mb) flash on chip, and uses the DOUT flash mode.
+
+There is an extra esp_init_data_default.bin file which has to be flashed at the
+end of the image for older versions of the software (early 1.5.4.1 images). It
+is explained here :
+
+   https://nodemcu.readthedocs.io/en/master/en/flash/
+
+Newer versions (starting with the 1.5.4.1 release) don't need it anymore.
+
+Examples :
+
+  - For ESP-12E, modern image :
+    python tools/esptool.py --port /dev/ttyUSB0 erase_flash
+    python tools/esptool.py --port /dev/ttyUSB0 --baud 115200 write_flash -ff 40m -fs 32m -fm dio  0x000000 nodemcu-master-12-modules-2017-09-23-21-24-50-integer.bin
+
+  - For ESP-12E, older image + esp_init_data_default :
+    python tools/esptool.py --port /dev/ttyUSB0 erase_flash
+    python tools/esptool.py --port /dev/ttyUSB0 --baud 115200 write_flash -ff 40m -fs 32m -fm dio  0x000000 firmware/nodemcu-master-19-modules-2016-10-08-17-08-57-float.bin 0x3fc000 esp_init_data_default.bin
+
+  - For ESP8285, modern image :
+    python tools/esptool.py --port /dev/ttyUSB0 erase_flash
+    python tools/esptool.py --port /dev/ttyUSB0 --baud 115200 write_flash -ff 80m -fs  8m -fm dout 0x000000 firmware/nodemcu-1.5.4.1-final-25-modules-2017-08-15-17-48-41-float.bin
+
+
+Note that verify always says that the first image doesn't verify, this is
+because bytes 2 and 3 are affected by -fs, -fm and -ff.
+
+
+4) First boot
+-------------
+
+Upon next boot, be sure not to assert DTR (or unplug it). The terminal must be
+configured to 115200 bauds. It remains silent for about one minute, the time
+needed to format the file system. Then the lua interpreter boots and says it
+cannot open init.lua. If that doesn't work, it could be that the device hung,
+thus a power cycle might help, but will require to wait as long for the flash
+file system to be formated again. If nothing ever happens, it can be useful to
+switch to 74880 bauds and observe the initial boot messages. Luatool knows how
+to configure the terminal at this speed.
+
+
+5) File upload
+--------------
+
+It is then possible to flash all files using luatool.py. This one defaults to a
+USB tty but it can be changed and even works over TCP. Some delay is required
+to avoid losing characters depending on the speed. 0.02 is OK at 115200 and
+over telnet, but 74880 requires 0.03. When the ESP8285 goes crazy, it might
+require to be reflashed using 74880 bauds.
+
+  #PORT="-p /dev/ttyUSB0 -b 74880 --delay 0.03"
+  #PORT="--ip 192.168.10.10:23 --delay 0.02"
+  PORT="-p /dev/ttyUSB0 -b 115200 --delay 0.02"
+
+Then it's required to flash boot and service files. Once the network and telnet
+service are flashed, it's generally enough to access the device over the
+network.
+
+  python tools/luatool.py $PORT    -f boot/init.lua
+  python tools/luatool.py $PORT -c -f boot/nodemcu.lua
+  python tools/luatool.py $PORT -c -f boot/socket.lua
+  python tools/luatool.py $PORT -c -f boot/netsetup.lua
+  python tools/luatool.py $PORT -c -f firmware/firmware-1.5.4.1.lua -t firmware.lua
+
+The "show" and "cat" libs are very convenient to list files and show their
+contents. The "time" lib is used to set/retrieve time. The "debounce" lib is
+used to debounce buttons, and during boot to detect if the user presses the
+first button to force enter recovery mode :
+
+  python tools/luatool.py $PORT -c -f lib/show.lua      -t lib/01-show.lua
+  python tools/luatool.py $PORT -c -f lib/cat.lua       -t lib/02-cat.lua
+  python tools/luatool.py $PORT -c -f lib/time.lua      -t lib/03-time.lua
+  python tools/luatool.py $PORT -c -f lib/debounce.lua  -t lib/04-debounce.lua
+
+The "recovery" service is useful to prevent the application from loading and
+leave the system waiting for user operation :
+
+  python tools/luatool.py $PORT -c -f svc/recovery.lua  -t svc/02-recovery.lua
+
+The "led" service manipulates a led using led_on() and led_off(). This is
+convenient for debugging and verifying that the system works :
+
+  python tools/luatool.py $PORT -c -f svc/led.lua       -t svc/04-led.lua
+
+The "telnet" service is useful to issue commands in interactive mode :
+
+  python tools/luatool.py $PORT -c -f svc/telnet.lua    -t svc/20-telnet.lua
+
+The board configuration is required to assign pins. It's a good idea to start
+from a copy of conf/board.tpl and to modify it according to the board's wiring,
+then upload it as "board.lua" :
+
+  python tools/luatool.py $PORT -c -f conf/board.lua -t board.lua
+
+The network configuration needs to be uploaded. For this, it is recommended to
+start from a copy of conf/netconf.tpl and modify it according to the local WiFi
+settings, then upload it.
+
+  python tools/luatool.py $PORT -c -f conf/netconf.lua -t netconf.lua
+
+If some extra variables have to be set for the application, they can be added
+into sysconf.lua :
+
+  python tools/luatool.py $PORT -c -f conf/sysconf.lua -t sysconf.lua
+
+From this point the device is accessible over telnet if it is rebooted. It's
+even possible to continue the flashing process by changing the PORT setting to
+use the IP address.
+
+Uploading the application normally only consists in uploading all application
+files and the application's main file as "appli.lua" :
+
+  python tools/luatool.py $PORT -c -f project/appli.lua -t appli.lua
+
+It's worth being careful about the code size (especially the memory), and to
+save as much as possible by saving most files pre-compiled. Luatool also knows
+how to do this and will automatically remove the target file once done when
+called with "-c". This saves quite some ram because the compiler is not invoked
+during boot (and it probably leaks a bit). Warning, there's no error output
+when compiling. Warning, do not do this with init.lua or dofile() will not work
+anymore!
+
+It is important to note the chipid and the telnet password by issuing this
+after rebooting from the serial console, and keeping a copy of its output :
+
+  s=     "   node.chipid()     = " .. node.chipid() .. string.format(" (%x)",node.chipid())
+  s=s.."\n   node.flashid()    = " .. node.flashid() .. "\n   node.flashsize()  = " .. node.flashsize()
+  s=s.."\n   wifi.sta.getmac() = " .. wifi.sta.getmac() .. "\n   wifi.ap.getmac()  = " .. wifi.ap.getmac()
+  s=s.."\n   wifi.sta.getip()  = " .. wifi.sta.getip() .. "\n   passwd            = " .. telnet_passwd
+  print(s)
