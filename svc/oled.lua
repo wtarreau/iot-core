@@ -77,10 +77,10 @@ function draw_7seg(x0,y0,code)
 end
 
 -- Draw character <c> with top left corner at (x0,y0). For now values of <d>
--- may be within '0' and '9', ':', '-' or '_'. An optional non-zero value may
--- be passed as a 4th argument to underline the character. Characters are 12
--- pixels wide by 20 pixels high (24 with the underline). <c> may be either a
--- character or an ASCII code.
+-- may be within '0' and '9', ':', '.', '-', '_' or '°'. An optional non-zero
+-- value may be passed as a 4th argument to underline the character. Characters
+-- are 12 pixels wide by 20 pixels high (24 with the underline). <c> may be
+-- either a character or an ASCII code.
 function draw_7seg_char(x0,y0,c,u)
   local code= (type(c)=="string") and string.byte(c) or tonumber(c)
   if not disp then return end
@@ -91,6 +91,10 @@ function draw_7seg_char(x0,y0,c,u)
     draw_7seg(x0,y0,64+(u and u>0 and 128 or 0))
   elseif code == 0x5f then -- "_"
     draw_7seg(x0,y0,8+(u and u>0 and 128 or 0))
+  elseif code == 0xb0 then -- "°"
+    draw_7seg(x0,y0,0x63+(u and u>0 and 128 or 0))
+  elseif code == 0x2e then
+    disp:drawDisc(x0+5, y0+18, 2, DRAW_ALL)
   elseif code == 0x3a then
     disp:drawDisc(x0+5, y0+5, 2, DRAW_ALL)
     disp:drawDisc(x0+5, y0+13, 2, DRAW_ALL)
