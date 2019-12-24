@@ -1,0 +1,20 @@
+Pin name mapping. The Wemos pin numbers directly correspond to the number
+to use in the code.
+
+ESP8266   Wemos-D1 mini
+TXD0      TX
+RXD0      RX
+GPIO5     D1
+GPIO4     D2
+GPIO0     D3
+GPIO2     D4
+GPIO15    D8
+GND       GND
+VCC       3V3
+GPIO13    D7
+GPIO12    D6
+GPIO14    D5
+GPIO16    D0
+EN        3V3 via 10k
+ADC       A0 via 220k
+RST       RST
