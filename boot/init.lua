@@ -1,6 +1,26 @@
 -- to be sure to fix it
 uart.setup(0,115200,8,0,1)
 
+-- check if we have an LFS image available ("lfs.img")
+if file.exists("lfs.img") then
+  file.remove("lfs.tmp")
+  file.rename("lfs.img", "lfs.tmp")
+  if not node.flashreload then
+    print("removing unsupported lfs.img")
+  else
+    print("flashing new lfs.img and rebooting")
+    node.flashreload("lfs.tmp")
+    print("failed (probably too low on memory")
+    file.rename("lfs.tmp", "lfs.img")
+  end
+end
+
+-- remove leftover from a previous upgrade
+file.remove("lfs.tmp")
+
+if node.flashindex then pcall(function() node.flashindex'_init'() end) end
+
+
 local function load_dir(dir)
   local toload={}
   for n,s in pairs(file.list()) do
