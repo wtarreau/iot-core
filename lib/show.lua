@@ -1,8 +1,19 @@
-function show(x) for k,v in pairs(x) do print(k,v) end end
-function sshow(x)
-  local t = {}
-  for k in pairs(x) do table.insert(t, k) end
-  table.sort(t)
-  for i,k in ipairs(t) do print(k,x[k]) end
+local function totypedstring(x)
+  if type(x) == "string" then x = '"' .. x .. '"' end
+  x = tostring(x)
+  return x
 end
-function ls() sshow(file.list()) end
+
+function show(x)
+  print(totypedstring(x))
+  if type(x) == "userdata" then x=getmetatable(x) end
+  local t=type(x)
+  if t == "table" or t == "romtable" then
+    local t={}
+    for k in pairs(x) do table.insert(t,k) end
+    table.sort(t)
+    for i,k in ipairs(t) do print(string.format("  %-20s %s",k,totypedstring(x[k]))) end
+  end
+end
+
+function ls() show(file.list()) end
