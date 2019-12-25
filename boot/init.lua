@@ -1,7 +1,7 @@
 -- to be sure to fix it
 uart.setup(0,115200,8,0,1)
 
-function load_dir(dir)
+local function load_dir(dir)
   local toload={}
   for n,s in pairs(file.list()) do
     local b,e = string.find(n, dir .. "/")
@@ -15,7 +15,7 @@ function load_dir(dir)
   end
 end
 
-function load_file(f)
+local function load_file(f)
   if file.exists(f .. ".lc") then dofile(f .. ".lc")
   elseif file.exists(f .. ".lua") then dofile(f .. ".lua")
   end
