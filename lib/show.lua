@@ -11,7 +11,7 @@ function show(x)
   if t == "table" or t == "romtable" then
     local t={}
     for k in pairs(x) do table.insert(t,k) end
-    table.sort(t)
+    pcall(function() table.sort(t) end)
     for i,k in ipairs(t) do print(string.format("  %-20s %s",k,totypedstring(x[k]))) end
   end
 end
