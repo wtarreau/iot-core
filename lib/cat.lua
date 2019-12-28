@@ -1,7 +1,10 @@
-function cat(n)
+local function cat(n)
   local f = n and file.open(n,"r")
-  while f ~= nil do
+  while f do
     local p = file.read(f)
-    if not p then file.close(f) f=nil else print(p) end
+    if p then print(p) else file.close(f) f=nil end
   end
 end
+
+local G=getfenv()
+G.cat=cat
