@@ -1,47 +1,46 @@
 -- returns time in HH:MM:SS and YYYY-MM-DD formats, week day in [1..7] for
 -- [Sun..Sat]. Also can return current time, taking care of time offset in
--- time_offset variable if set. Requires rtctime.
+-- time_offset variable if set. Requires rtctime, which is automatically
+-- checked for.
 
-function time_hms(d)
-  local t={0,0,0,0,0,0,0,0}
-  if rtctime ~= nil then t=rtctime.epoch2cal(d) end
+-- returns time <d> as {year,mon,day,hour,min,sec,wday,yday} a-la localtime()
+local function time_local(d)
+  return rtctime and rtctime.epoch2cal(d) or {
+    year=0, mon=0, day=0,
+    hour=0, min=0, sec=0,
+    wday=0, yday=0}
+end
+
+-- returns current time as {year,mon,day,hour,min,sec,wday,yday} a-la localtime()
+local function time_now()
+  return time_local(rtctime and (rtctime.get() + (time_offset or 0)) or 0)
+end
+
+-- returns "HH:MM:SS" from a time_local()/time_now() output
+local function time_hms(t)
   return string.format("%02d:%02d:%02d",t["hour"],t["min"],t["sec"])
 end
 
-function time_ymd(d)
-  local t={0,0,0,0,0,0,0,0}
-  if rtctime ~= nil then t=rtctime.epoch2cal(d) end
+-- returns "YYYY-MM-DD" from a time_local()/time_now() output
+local function time_ymd(t)
   return string.format("%04d-%02d-%02d",t["year"],t["mon"],t["day"])
 end
 
-function time_wd(d)
-  local t={0,0,0,0,0,0,0,0}
-  if rtctime ~= nil then t=rtctime.epoch2cal(d) end
+-- returns the day of week (int) from a time_local()/time_now() output
+local function time_wd(t)
   return t["wday"]
 end
 
-function time_hms_now()
-  local t=time_offset or 0
-  if rtctime ~= nil then t=t+rtctime.get() end
-  return time_hms(t)
-end
-
-function time_ymd_now()
-  local t=time_offset or 0
-  if rtctime ~= nil then t=t+rtctime.get() end
-  return time_ymd(t)
-end
-
-function time_wd_now()
-  local t=time_offset or 0
-  if rtctime ~= nil then t=t+rtctime.get() end
-  return time_wd(t)
-end
-
--- returns y,m,d,h,m,s,wd
-function time_get_now()
-  local t={}
-  if not rtctime then return 0,0,0,0,0,0,0 end
-  t=rtctime.epoch2cal(rtctime.get() + (time_offset or 0))
+-- returns y,m,d,h,m,s,wd from current time
+local function time_get_now()
+  local t=time_now()
   return t["year"],t["mon"],t["day"],t["hour"],t["min"],t["sec"],t["wday"]
 end
+
+local G=getfenv()
+G.time_local=time_local
+G.time_now=time_now
+G.time_hms=time_hms
+G.time_ymd=time_ymd
+G.time_wd=time_wd
+G.time_get_now=time_get_now
