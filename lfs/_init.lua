@@ -30,27 +30,32 @@ local index = node.flashindex
 
 local lfs_t = {
   __index = function(_, name)
-      local fn_ut, ba, ma, size, modules = index(name)
-      if not ba then
-        return fn_ut
-      elseif name == '_time' then
-        return fn_ut
-      elseif name == '_config' then
-        local fs_ma, fs_size = file.fscfg()
-        return {lfs_base = ba, lfs_mapped = ma, lfs_size = size,
-                fs_mapped = fs_ma, fs_size = fs_size}
-      elseif name == '_list' then
-        return modules
-      else
-        return nil
-      end
+      return nil
     end,
 
   __newindex = function(_, name, value)
       error("LFS is readonly. Invalid write to LFS." .. name, 2)
     end,
 
-  }
+  _time=function()
+      local fn_ut = index()
+      return fn_ut
+    end,
+
+  _config=function()
+      local fn_ut, ba, ma, size = index()
+      local fs_ma, fs_size = file.fscfg()
+      return {lfs_base = ba, lfs_mapped = ma, lfs_size = size,
+              fs_mapped = fs_ma, fs_size = fs_size}
+    end,
+
+  _list=function()
+      local _, _, _, _, modules = index()
+      return modules
+    end,
+}
+
+for k,v in pairs(lfs_t._list()) do lfs_t[v]=index(v) end
 
 local G=getfenv()
 G.LFS = setmetatable(lfs_t,lfs_t)
