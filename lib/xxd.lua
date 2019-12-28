@@ -1,6 +1,6 @@
-function xxd(fn)
+local function xxd(fn)
   local p,f = 0, file.open(fn, "rb")
-  while f ~= nil do
+  while f do
     local o,h,d = "", "", f:read(16)
     for b = 1,16 do
       if b <= #d then
@@ -19,3 +19,6 @@ function xxd(fn)
     p = p + 16
   end
 end
+
+local G=getfenv()
+G.xxd=xxd
