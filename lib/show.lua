@@ -4,7 +4,7 @@ local function totypedstring(x)
   return x
 end
 
-function show(x)
+local function show(x)
   print(totypedstring(x))
   if type(x) == "userdata" then x=getmetatable(x) end
   local t=type(x)
@@ -16,4 +16,8 @@ function show(x)
   end
 end
 
-function ls() show(file.list()) end
+local function ls() show(file.list()) end
+
+local G=getfenv()
+G.show=show
+G.ls=ls
