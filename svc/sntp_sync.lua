@@ -2,7 +2,7 @@
 if recovery and recovery() ~= 0 then return end
 
 function sntp_sync()
-  if sntp_srv_ip ~= nil then
+  if sntp and sntp_srv_ip then
     sntp.sync(sntp_srv_ip, function()
       sntp_sync_state=1
       sntp_last_sync=tmr.time()
