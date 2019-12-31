@@ -1,5 +1,5 @@
 function disp_init()
-  if not brd_oled_addr then return end
+  if not u8g or not brd_oled_addr then return end
   local fct = u8g.ssd1306_128x64_i2c or u8g.ssd1306_128x32_i2c or u8g.ssd1306_64x64_i2c
   -- release unused memory
   u8g.ssd1306_128x32_hw_spi=nil
@@ -130,7 +130,7 @@ disp_init()
 -- release unused memory
 disp_init = nil
 
-if wifi ~= nil then
+if disp and wifi ~= nil then
   local ssid=wifi.sta.getconfig(wifi.sta.getapindex())
   local a,b=node.bootreason()
   disp_reset_font(u8g.font_04b_03r)
