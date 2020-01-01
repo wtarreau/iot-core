@@ -1,41 +1,47 @@
-function disp_init()
-  if not u8g or not brd_oled_addr then return end
-  local fct = u8g.ssd1306_128x64_i2c or u8g.ssd1306_128x32_i2c or u8g.ssd1306_64x64_i2c
-  -- release unused memory
-  u8g.ssd1306_128x32_hw_spi=nil
-  u8g.ssd1306_128x64_hw_spi=nil
-  if not fct then return end
-  disp = fct(brd_oled_addr)
-  if disp ~= nil then
-    disp:begin()
-    disp_reset_font()
-  end
-end
+-- the display instance itself
+disp=nil
 
-function disp_reset_font(f)
+local function disp_reset_font(f)
   if not disp then return end
-  disp:setFont(f or default_font or DISP_FONT or u8g.font_6x10 or u8g.font_5x8 or u8g.font_04b_03r or u8g.font_04b_03 or u8g.font_chikita)
+  if not f then f=DISP_FONT end
+  if not f then
+    for n in pairs(u8g2) do
+      if string.match(n,"^font_") then f=n end
+    end
+  end
+  f=u8g2[f]
+  if not f then return end
+  disp:setFont(f)
   disp:setFontRefHeightExtendedText()
-  disp:setDefaultForegroundColor()
   disp:setFontPosTop()
 end
 
-function disp_clear()
-  if not disp then return end
-  disp:firstPage()
-  while disp:nextPage() do end
+local function disp_init()
+  if not u8g2 or not brd_oled_addr then return end
+  local fct = u8g2[brd_oled_d] or u8g2.ssd1306_i2c_128x64_noname or u8g2.ssd1306_spi_128x64_noname
+  if not fct then return end
+  disp = fct(0,brd_oled_addr)
+  if disp ~= nil then
+    disp_reset_font()
+  end
+  return disp
 end
 
-function disp_lines(...)
+local function disp_clear()
+  if not disp then return end
+  disp:clearBuffer()
+  disp:sendBuffer()
+end
+
+local function disp_lines(...)
   local args={...}
   local arg
   if not disp then return end
-  disp:firstPage()
-  repeat
-    for arg=1,#args do
-      disp:drawStr(0,(arg-1)*disp:getFontLineSpacing(),args[arg])
-    end
-  until not disp:nextPage()
+  disp:clearBuffer()
+  for arg=1,#args do
+    disp:drawStr(0,(arg-1)*(disp:getAscent()-disp:getDescent()),args[arg])
+  end
+  disp:sendBuffer()
 end
 
 -- Draw the segments represented by the bit field <code> with top left corner
@@ -48,7 +54,7 @@ end
 -- 4     2    | 3=underline). <from> is in the high nibble, <to> in the low.
 --    3       | Lines are stripped by one pixel on each end.
 --    7       | 7 is an underline.
-function draw_7seg(x0,y0,code)
+local function draw_7seg(x0,y0,code)
   local coord=string.char(0x04, 0x45, 0x56, 0x26, 0x12, 0x01, 0x15, 0x37)
   local x1,y1,x2,y2,seg,pos
   if not disp then return end
@@ -81,7 +87,7 @@ end
 -- value may be passed as a 4th argument to underline the character. Characters
 -- are 12 pixels wide by 20 pixels high (24 with the underline). <c> may be
 -- either a character or an ASCII code.
-function draw_7seg_char(x0,y0,c,u)
+local function draw_7seg_char(x0,y0,c,u)
   local code= (type(c)=="string") and string.byte(c) or tonumber(c)
   if not disp then return end
   if code >= 0x30 and code <= 0x39 then
@@ -103,7 +109,7 @@ end
 
 -- Draws string <s> at <x0,y0> using a 7seg font, and underline char #<u> if
 -- positive (starts at 1).
-function draw_7seg_str(x0,y0,s,u)
+local function draw_7seg_str(x0,y0,s,u)
   local i
   for i=1,#s do
     draw_7seg_char(x0+(i-1)*13,y0,s:byte(i),u and u == i and 1 or 0)
@@ -112,15 +118,14 @@ end
 
 -- displays string <s> at <x0,y0> using 7-seg, and underline char <u> if
 -- positive (starts at 1).
-function disp_7seg_str(x0,y0,s,u)
+local function disp_7seg_str(x0,y0,s,u)
   if not disp then return end
-  disp:firstPage()
-  repeat
-    draw_7seg_str(x0,y0,s,u)
-  until not disp:nextPage()
+  disp:clearBuffer()
+  draw_7seg_str(x0,y0,s,u)
+  disp:sendBuffer()
 end
 
-function disp_release()
+local function disp_release()
   disp=nil disp_init=nil disp_reset_font=nil disp_clear=nil disp_lines=nil
   draw_7seg=nil draw_7seg_char=nil draw_7seg_str=nil disp_7seg_str=nil
   disp_release=nil
@@ -133,7 +138,7 @@ disp_init = nil
 if disp and wifi ~= nil then
   local ssid=wifi.sta.getconfig(wifi.sta.getapindex())
   local a,b=node.bootreason()
-  disp_reset_font(u8g.font_04b_03r)
+  disp_reset_font()
   disp_lines(
     "Booting " .. (wifi.sta.gethostname and wifi.sta.gethostname() or "?"),
     "MAC: " .. (wifi.sta.getmac and wifi.sta.getmac() or "?"),
@@ -141,6 +146,14 @@ if disp and wifi ~= nil then
     "Mode: " .. (recovery and recovery() > 0 and "dbg" or "run") .. ", boot " .. a .. "," .. b)
   disp_reset_font()
 end
+
+local G=getfenv()
+G.disp_release=disp_release
+G.disp_7seg_str=disp_7seg_str
+G.draw_7seg_str=draw_7seg_str
+G.disp_clear=disp_clear
+G.disp_lines=disp_lines
+G.disp_reset_font=disp_reset_font
 
 -- release memory when in debug mode
 if recovery and recovery() ~= 0 then disp_release() end
