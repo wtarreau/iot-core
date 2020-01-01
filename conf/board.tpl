@@ -13,3 +13,7 @@ brd_oled_d="ssd1306_i2c_128x32_noname"
 brd_oled_w=128
 brd_oled_h=32
 brd_oled_r=0
+
+-- ADC settings for 100k+400k
+brd_adc_a=5.0
+brd_adc_b=0.0
