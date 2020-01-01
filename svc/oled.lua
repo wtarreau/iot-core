@@ -14,6 +14,8 @@ local function disp_reset_font(f)
   disp:setFont(f)
   disp:setFontRefHeightExtendedText()
   disp:setFontPosTop()
+  f = u8g2["R"..tostring(brd_oled_r)]
+  if f then disp:setDisplayRotation(f) end
 end
 
 local function disp_init()

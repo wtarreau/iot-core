@@ -12,3 +12,4 @@ brd_oled_addr=0x3c
 brd_oled_d="ssd1306_i2c_128x32_noname"
 brd_oled_w=128
 brd_oled_h=32
+brd_oled_r=0
