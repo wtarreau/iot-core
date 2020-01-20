@@ -63,6 +63,7 @@ tcpsrv:listen((telnet_port or 23),function(c)
   if (telnet_auth) then
     node.output(s_output, 0)
   elseif telnet_conns > 1 then
+    telnet_conns=telnet_conns-1
     c:close()
   end
 end)
