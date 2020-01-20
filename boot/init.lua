@@ -19,7 +19,7 @@ end
 file.remove("lfs.tmp")
 
 -- load all LFS symbols
-if node.flashindex and not pcall(function() node.flashindex'_init'() end) then
+if node.flashindex and node.flashindex'_init' and not pcall(function() node.flashindex'_init'() end) then
   print("Caught exception while initializing LFS")
 end
 
