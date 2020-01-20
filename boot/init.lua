@@ -24,7 +24,7 @@ if node.flashindex and not pcall(function() node.flashindex'_init'() end) then
 end
 
 -- start, either from LFS or from SPIFFS
-if file.exists("start.lc") or LFS.start ~= nil then
+if file.exists("start.lc") or (LFS and LFS.start) then
   if not pcall(dofile,"start.lc") then
     print("Caught exception while initializing services")
   end
