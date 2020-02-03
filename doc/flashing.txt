@@ -127,6 +127,7 @@ service are flashed, it's generally enough to access the device over the
 network.
 
   python tools/luatool.py $PORT    -f boot/init.lua
+  python tools/luatool.py $PORT -c -f boot/start.lua
   python tools/luatool.py $PORT -c -f boot/nodemcu.lua
   python tools/luatool.py $PORT -c -f boot/socket.lua
   python tools/luatool.py $PORT -c -f boot/netsetup.lua
