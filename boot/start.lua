@@ -1,3 +1,8 @@
+local function print_load(f)
+    print("Loading " .. f)
+    dofile(f)
+end
+
 local function load_dir(dir)
   local toload={}
   for n,s in pairs(file.list()) do
@@ -15,18 +20,15 @@ local function load_dir(dir)
   table.sort(toload)
 
   for n,f in pairs(toload) do
-    print("Loading " .. f)
-    dofile(f)
+    print_load(f)
   end
 end
 
 local function load_file(f)
   if file.exists(f .. ".lc") or (LFS and type(LFS[f]) == "function") then
-    print("Loading " .. f)
-    dofile(f .. ".lc")
+    print_load(f .. ".lc")
   elseif file.exists(f .. ".lua") then
-    print("Loading " .. f)
-    dofile(f .. ".lua")
+    print_load(f .. ".lua")
   end
 end
 
@@ -50,7 +52,6 @@ load_file("post-svc")
 load_dir=nil
 
 if not recovery or recovery() == 0 then
-  print("Loading appli.lua")
   load_file("appli")
 else
   print("Skipping appli.lua due to recovery button")
