@@ -21,8 +21,12 @@ local function load_dir(dir)
 end
 
 local function load_file(f)
-  if file.exists(f .. ".lc") or type(LFS[f]) == "function" then dofile(f .. ".lc")
-  elseif file.exists(f .. ".lua") then dofile(f .. ".lua")
+  if file.exists(f .. ".lc") or (LFS and type(LFS[f]) == "function") then
+    print("Loading " .. f)
+    dofile(f .. ".lc")
+  elseif file.exists(f .. ".lua") then
+    print("Loading " .. f)
+    dofile(f .. ".lua")
   end
 end
 
