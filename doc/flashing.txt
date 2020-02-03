@@ -188,8 +188,9 @@ save as much as possible by saving most files pre-compiled. Luatool also knows
 how to do this and will automatically remove the target file once done when
 called with "-c". This saves quite some ram because the compiler is not invoked
 during boot (and it probably leaks a bit). Warning, there's no error output
-when compiling. Warning, do not do this with init.lua or dofile() will not work
-anymore!
+when compiling. Warning, do not do this with init.lua or rename "init.lc" to
+"init.lua" afterwards. Also, issues with dofile() were noticed in the past
+(firmware 0.9 or so) with compressed init.
 
 It is important to note the chipid and the telnet password by issuing this
 after rebooting from the serial console, and keeping a copy of its output :
