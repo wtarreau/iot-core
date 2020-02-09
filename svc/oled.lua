@@ -134,8 +134,6 @@ local function disp_release()
 end
 
 disp_init()
--- release unused memory
-disp_init = nil
 
 if disp and wifi ~= nil then
   local ssid=wifi.sta.getconfig(wifi.sta.getapindex())
