@@ -1,7 +1,7 @@
 -- returns time in HH:MM:SS and YYYY-MM-DD formats, week day in [1..7] for
 -- [Sun..Sat]. Also can return current time, taking care of time offset in
--- time_offset variable if set. Requires rtctime, which is automatically
--- checked for.
+-- time_offset variable if set (should be set in timezone.lua, set in seconds
+-- from UTC). Requires rtctime, which is automatically checked for.
 
 -- returns time <d> as {year,mon,day,hour,min,sec,wday,yday} a-la localtime()
 local function time_local(d)

@@ -13,6 +13,7 @@ After programming a device, its filesystem should be prepared like this :
    Lua script proceeding with the various boot steps :
        dofile("netconf.lua")
        dofile("sysconf.lua")
+       dofile("timezone.lua")
        for n,s in pairs(file.list()) do
          b,e = string.find(n, "lib/")
          if b == 1 then print("Loading " .. n) dofile(n) end
@@ -45,6 +46,10 @@ After programming a device, its filesystem should be prepared like this :
    Contains a few variables specific to the device. Used to store settings
    related to external services, for example authentication needed to connect
    to an MQTT broker, or an alias for the device name.
+
+ timezone.lua :
+   Only sets the time_offset variable as a number of seconds from UTC (e.g.
+   3600 for UTC+1).
 
  lib/*.lua :
    Libraries offering convenient general purpose functions. They are loaded in

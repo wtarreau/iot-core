@@ -37,6 +37,7 @@ load_file("firmware")
 load_file("board")
 load_file("netconf")
 load_file("sysconf")
+load_file("timezone")
 
 load_dir("lib")
 
