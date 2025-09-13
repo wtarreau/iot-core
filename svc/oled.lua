@@ -24,6 +24,7 @@ local function disp_init()
   if not fct then return end
   disp = fct(0,brd_oled_addr)
   if disp ~= nil then
+    disp:setContrast(0)
     disp_reset_font()
   end
   return disp
